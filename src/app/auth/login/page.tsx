@@ -3,18 +3,26 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useLogin } from "@/features/auth/hooks";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const loginMutation = useLogin();
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    console.log({
+    loginMutation.mutate({
       email,
       password,
     });
@@ -27,6 +35,7 @@ export default function LoginPage() {
           <CardTitle className="text-2xl font-bold">
             Sign in
           </CardTitle>
+
           <p className="text-sm text-muted-foreground">
             Sign in to manage your invoices and expenses.
           </p>
@@ -36,12 +45,14 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
+
               <Input
                 id="email"
                 type="email"
                 placeholder="you@example.com"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
+                disabled={loginMutation.isPending}
                 required
               />
             </div>
@@ -64,12 +75,23 @@ export default function LoginPage() {
                 placeholder="Enter your password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
+                disabled={loginMutation.isPending}
                 required
               />
             </div>
 
-            <Button type="submit" className="w-full">
-              Sign in
+            {loginMutation.isError && (
+              <p className="text-sm text-destructive">
+                Unable to sign in. Please check your email and password.
+              </p>
+            )}
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loginMutation.isPending}
+            >
+              {loginMutation.isPending ? "Signing in..." : "Sign in"}
             </Button>
           </form>
 

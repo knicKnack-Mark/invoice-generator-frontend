@@ -105,8 +105,14 @@ const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
               />
             </div>
 
-            <Button type="submit" className="w-full">
-              Create account
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={registerMutation.isPending}
+            >
+              {registerMutation.isPending
+                ? "Creating account..."
+                : "Create account"}
             </Button>
           </form>
 
