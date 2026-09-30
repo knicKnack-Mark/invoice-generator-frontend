@@ -6,23 +6,31 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useRegister } from "@/features/auth/hooks";
+
+
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
+const registerMutation = useRegister();
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  event.preventDefault();
 
-    console.log({
-      name,
-      email,
-      password,
-      passwordConfirmation,
-    });
-  };
+  if (password !== passwordConfirmation) {
+    return;
+  }
+
+  registerMutation.mutate({
+    name,
+    email,
+    password,
+    password_confirmation: passwordConfirmation,
+  });
+};
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-8">
