@@ -18,11 +18,11 @@ export interface AuthUser {
   id: string;
   name: string;
   email: string;
+  is_active: boolean;
 }
 
 export interface AuthResponse {
   access_token: string;
-  refresh_token?: string;
-  token_type: string;
-  user?: AuthUser;
+  user: AuthUser;
+  organizations: Organization[];
 }
