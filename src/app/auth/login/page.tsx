@@ -12,8 +12,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLogin } from "@/features/auth/hooks";
+import { useRouter } from "next/navigation";
+
+
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -22,10 +26,19 @@ export default function LoginPage() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    loginMutation.mutate({
-      email,
-      password,
-    });
+    loginMutation.mutate(
+      {
+        email,
+        password,
+      },
+      {
+        onSuccess: (data) => {
+          console.log("Login successful:", data);
+
+          router.push("/dashboard");
+        },
+      },
+    );
   };
 
   return (
