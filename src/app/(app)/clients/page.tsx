@@ -1,20 +1,52 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
+import { ClientDialog } from "@/components/clients/client-dialog";
+import { ClientDeleteDialog } from "@/components/clients/client-delete-dialog";
+import { ClientTable } from "@/components/clients/client-table";
+
 import { useClients } from "@/features/clients/hooks";
+import type { Client } from "@/features/clients/types";
 
 export default function ClientsPage() {
   const [search, setSearch] = useState("");
 
-  const { data, isLoading, isError } = useClients(
-    1,
-    20,
-    search,
-  );
+  const [dialogOpen, setDialogOpen] =
+    useState(false);
+
+  const [deleteDialogOpen, setDeleteDialogOpen] =
+    useState(false);
+
+  const [selectedClient, setSelectedClient] =
+    useState<Client | null>(null);
+
+  const {
+    data,
+    isLoading,
+    isError,
+  } = useClients(1, 20, search);
+
+  const clients = data?.items ?? [];
+
+  const handleCreate = () => {
+    setSelectedClient(null);
+    setDialogOpen(true);
+  };
+
+  const handleEdit = (client: Client) => {
+    setSelectedClient(client);
+    setDialogOpen(true);
+  };
+
+  const handleDelete = (client: Client) => {
+    setSelectedClient(client);
+    setDeleteDialogOpen(true);
+  };
 
   return (
     <div className="p-6 sm:p-8">
@@ -31,30 +63,44 @@ export default function ClientsPage() {
             </h1>
 
             <p className="mt-1 text-sm text-black/50">
-              Manage the people and businesses you invoice.
+              Manage the people and businesses you
+              invoice.
             </p>
           </div>
 
-          <Button>
+          <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
             New client
           </Button>
         </div>
 
         {/* Search */}
-        <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-black/35" />
+        <div className="flex items-center justify-between gap-4">
+          <div className="relative w-full max-w-sm">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-black/35" />
 
-          <Input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search clients..."
-            className="pl-9"
-          />
+            <Input
+              value={search}
+              onChange={(event) =>
+                setSearch(event.target.value)
+              }
+              placeholder="Search clients..."
+              className="pl-9"
+            />
+          </div>
+
+          {data && (
+            <p className="hidden shrink-0 text-sm text-black/40 sm:block">
+              {data.total}{" "}
+              {data.total === 1
+                ? "client"
+                : "clients"}
+            </p>
+          )}
         </div>
 
-        {/* Content */}
-        <div className="rounded-xl border border-black/8 bg-white">
+        {/* Table */}
+        <div className="overflow-hidden rounded-xl border border-black/8 bg-white">
           {isLoading && (
             <div className="p-8 text-sm text-black/50">
               Loading clients...
@@ -69,61 +115,57 @@ export default function ClientsPage() {
 
           {!isLoading &&
             !isError &&
-            data?.items.length === 0 && (
-              <div className="flex min-h-[300px] flex-col items-center justify-center p-8 text-center">
+            clients.length === 0 && (
+              <div className="flex min-h-[320px] flex-col items-center justify-center px-6 py-12 text-center">
                 <h2 className="text-sm font-medium">
-                  No clients yet
+                  {search
+                    ? "No clients found"
+                    : "No clients yet"}
                 </h2>
 
                 <p className="mt-1 max-w-sm text-sm text-black/45">
-                  Add your first client to start tracking
-                  invoices, payments, and projects.
+                  {search
+                    ? "Try adjusting your search."
+                    : "Add your first client to start tracking invoices, projects, and payments."}
                 </p>
 
-                <Button className="mt-5">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add client
-                </Button>
+                {!search && (
+                  <Button
+                    className="mt-5"
+                    onClick={handleCreate}
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add client
+                  </Button>
+                )}
               </div>
             )}
 
           {!isLoading &&
             !isError &&
-            data &&
-            data.items.length > 0 && (
-              <div className="divide-y divide-black/8">
-                {data.items.map((client) => (
-                  <div
-                    key={client.id}
-                    className="flex items-center justify-between p-5"
-                  >
-                    <div>
-                      <p className="font-medium">
-                        {client.name}
-                      </p>
-
-                      <p className="mt-1 text-sm text-black/45">
-                        {client.email}
-                      </p>
-                    </div>
-
-                    <div className="text-right">
-                      <p className="text-sm">
-                        {client.company || "—"}
-                      </p>
-
-                      <p className="mt-1 text-xs text-black/40">
-                        {client.is_active
-                          ? "Active"
-                          : "Inactive"}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            clients.length > 0 && (
+              <ClientTable
+                clients={clients}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
             )}
         </div>
       </div>
+
+      {/* Create / Edit */}
+      <ClientDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        client={selectedClient}
+      />
+
+      {/* Delete */}
+      <ClientDeleteDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        client={selectedClient}
+      />
     </div>
   );
 }
