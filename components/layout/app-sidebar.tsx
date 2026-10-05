@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   BriefcaseBusiness,
   Clock3,
@@ -11,6 +12,10 @@ import {
   Users,
   WalletCards,
 } from "lucide-react";
+
+function isActivePath(pathname: string, href: string) {
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
 
 const navigation = [
   {
@@ -71,6 +76,9 @@ const navigation = [
 ];
 
 export function AppSidebar() {
+  const pathname = usePathname();
+  const settingsActive = isActivePath(pathname, "/settings");
+
   return (
     <aside className="hidden h-screen w-[230px] shrink-0 border-r border-black/8 bg-[#f3f3f0] lg:flex lg:flex-col">
       <div className="flex h-20 items-center px-6">
@@ -107,13 +115,13 @@ export function AppSidebar() {
             <div className="space-y-0.5">
               {group.items.map((item) => {
                 const Icon = item.icon;
-                const active =
-                  item.href === "/dashboard";
+                const active = isActivePath(pathname, item.href);
 
                 return (
                   <Link
                     key={item.name}
                     href={item.href}
+                    aria-current={active ? "page" : undefined}
                     className={`flex h-9 items-center gap-3 rounded-md px-3 text-[13px] transition ${
                       active
                         ? "bg-white font-medium text-[#1d1d1b] shadow-sm ring-1 ring-black/5"
@@ -137,7 +145,12 @@ export function AppSidebar() {
       <div className="border-t border-black/8 p-3">
         <Link
           href="/settings"
-          className="flex items-center gap-3 rounded-md px-3 py-2 text-[13px] text-black/55 hover:bg-white/60"
+          aria-current={settingsActive ? "page" : undefined}
+          className={`flex items-center gap-3 rounded-md px-3 py-2 text-[13px] transition ${
+            settingsActive
+              ? "bg-white font-medium text-[#1d1d1b] shadow-sm ring-1 ring-black/5"
+              : "text-black/55 hover:bg-white/60 hover:text-black"
+          }`}
         >
           <Settings
             className="h-4 w-4"
