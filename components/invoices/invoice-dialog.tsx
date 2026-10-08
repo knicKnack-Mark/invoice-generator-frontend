@@ -24,10 +24,7 @@ import {
   useUpdateInvoice,
 } from "@/features/invoices/hooks";
 
-import type {
-  Invoice,
-  InvoiceStatus,
-} from "@/features/invoices/types";
+import type { Invoice } from "@/features/invoices/types";
 
 const invoiceSchema = z.object({
   client_id: z.string().min(1, "Client is required"),
