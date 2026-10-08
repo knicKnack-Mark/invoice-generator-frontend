@@ -1,9 +1,5 @@
 "use client";
 
-import { useDeleteExpense } from "@/features/expenses/hooks";
-import type { Expense } from "@/features/expenses/types";
-
-import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,60 +14,45 @@ import {
 interface ExpenseDeleteDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  expense?: Expense | null;
+  expenseDescription?: string;
+  onConfirm: () => void;
+  loading?: boolean;
 }
 
 export function ExpenseDeleteDialog({
   open,
   onOpenChange,
-  expense,
+  expenseDescription,
+  onConfirm,
+  loading = false,
 }: ExpenseDeleteDialogProps) {
-  const deleteMutation = useDeleteExpense();
-
-  async function handleDelete() {
-    if (!expense) return;
-
-    try {
-      await deleteMutation.mutateAsync(expense.id);
-      onOpenChange(false);
-    } catch {
-      // Keep dialog open if deletion fails.
-    }
-  }
-
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>
-            Delete expense?
-          </AlertDialogTitle>
+          <AlertDialogTitle>Delete expense?</AlertDialogTitle>
 
           <AlertDialogDescription>
-            This will permanently delete{" "}
-            <span className="font-medium text-black">
-              {expense?.description}
-            </span>
-            . This action cannot be undone.
+            {expenseDescription
+              ? `This will permanently delete "${expenseDescription}".`
+              : "This will permanently delete this expense."}{" "}
+            This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={deleteMutation.isPending}>
+          <AlertDialogCancel disabled={loading}>
             Cancel
           </AlertDialogCancel>
 
           <AlertDialogAction
             onClick={(event) => {
               event.preventDefault();
-              void handleDelete();
+              onConfirm();
             }}
-            disabled={deleteMutation.isPending}
-            className="bg-red-600 text-white hover:bg-red-700"
+            disabled={loading}
           >
-            {deleteMutation.isPending
-              ? "Deleting..."
-              : "Delete"}
+            {loading ? "Deleting..." : "Delete"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
